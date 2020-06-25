@@ -1,0 +1,38 @@
+#!/usr/bin/bash
+
+# flbl - file lookup by lines
+# Script takes three arguments: directory, pattern and line limit, then prints
+# list of text files which fullfills given criteria
+
+script_name="${0##*/}"
+dir=$1
+pattern=$2
+op=$3
+nlines=${4:-50}
+
+show_usage() {
+    echo "Usage: $script_name directory pattern gt|lt|ge|le line_number(default: 50)"
+    exit 1
+}
+
+awk_print() {
+    awk '$1 '$1' '$nlines' {print $0}'
+}
+
+if [ -d $dir ]; then
+    if [ -n "$pattern" ]; then
+        find $dir -name "$pattern" | xargs wc -l | sort -n |
+        case $3 in
+            "gt") awk_print ">" ;;
+            "lt") awk_print "<" ;;
+            "ge") awk_print ">=" ;;
+            "le") awk_print "<=" ;;
+            *) show_usage ;;
+        esac
+    else
+        show_usage
+    fi
+else
+    echo "Directory does not exist."
+fi
+
